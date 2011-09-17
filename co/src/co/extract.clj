@@ -1,13 +1,7 @@
 (ns co.extract
- (:use [clojure.contrib.duck-streams :only (slurp*)]
-   [local-file :only (file*)])
- (:import (java.util.zip ZipFile)
-   (java.io File))
- (:require (clojure [zip :as zip])))
-
-(def *root* (.getAbsolutePath (file* "../clojars-sync")))
-
-(def *root-clj* (.getAbsolutePath (file* "../clojars-clj")))
+  (:use [clojure.contrib.duck-streams :only (slurp*)])
+  (:import (java.util.zip ZipFile)
+           (java.io File)))
 
 (defn spew [f content & options]
   (let [f (if (isa? (type f) File) f (File. f))]
