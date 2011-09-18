@@ -1,6 +1,7 @@
 (ns co.core
   (:use [co.extract :only (clj-from-jars)]
-        [local-file :only (file*)]))
+        [local-file :only (file*)])
+  (:gen-class))
 
 (def *root* (.getAbsolutePath (file* "../clojars-sync")))
 
@@ -8,3 +9,7 @@
 
 (defn process []
   (clj-from-jars *root* *root-clj*))
+
+(defn -main [& args]
+  (process))
+
