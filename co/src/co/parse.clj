@@ -24,19 +24,19 @@
 
 (defn read-clojure-source
   "Takes the path to a clojure source file and returns a sequence
-  of maps, each containing an s-expression with metadata including
-  the line number, the file name and the source text."
+   of maps, each containing an s-expression with metadata including
+   the line number, the file name and the source text."
   [file]
   (let [text (slurp file)
         code-reader (recording-source-reader (StringReader. (str \newline text)))]
     (take-while identity (repeatedly
-      (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
-                   nbot (.getLineNumber code-reader)
-                   code-lines (.toString code-reader)
-                   line (- nbot (count (.split code-lines "\n")))]
-               (when sexpr (with-meta sexpr {:line line 
-                                             :file file
-                                             :source code-lines}))))))))
+                           (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
+                                        nbot (.getLineNumber code-reader)
+                                        code-lines (.toString code-reader)
+                                        line (- nbot (count (.split code-lines "\n")))]
+                                    (when sexpr (with-meta sexpr {:line line 
+                                                                  :file file
+                                                                  :source code-lines}))))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
 ;; vars: {:name :doc :arglists :var-type :file :line :added :deprecated :dynamic}
@@ -125,7 +125,9 @@
         (map #(merge ns-info %) (rest exprs-info))
         (throw (Exception. "First element is not a namespace declaration."))))))
 
-
+(defn process-file [f]
+  (binding [*read-eval* false] ;; untrusted code!!!
+    (create-var-entries (read-clojure-source test-file))))
 
 ;; tests
 
@@ -137,6 +139,6 @@
   (read-clojure-source test-file))
 
 (defn test-collect []
-  (create-var-entries (test-read)))
+  (process-file test-file))
 
 
