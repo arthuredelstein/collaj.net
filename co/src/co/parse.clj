@@ -3,7 +3,9 @@
 (ns co.parse
  (:import [clojure.lang LineNumberingPushbackReader]
           [java.io BufferedReader File StringReader]
-          [java.lang StringBuilder]))
+          [java.lang StringBuilder])
+ (:use [co.utils :only (spew)]
+       [clojure.pprint :only (pprint)]))
 
 (defn has?
   "If x is in collection, returns x, else nil."
@@ -35,7 +37,7 @@
                                         code-lines (.toString code-reader)
                                         line (- nbot (count (.split code-lines "\n")))]
                                     (when sexpr (with-meta sexpr {:line line 
-                                                                  :file file
+                                                                  :file (.getAbsolutePath file)
                                                                   :source code-lines}))))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
@@ -101,7 +103,7 @@
     "var"))
 
 (defn build-expr-info [sexpr]
-  (if-let [analysis (analyze-sexpr sexpr)]
+  (let [analysis (analyze-sexpr sexpr)]
     (with-meta
       (if (= (first sexpr) 'ns)
         (merge
@@ -115,25 +117,55 @@
            :var-type (get-var-type sexpr)}))
       {:expr-type (first sexpr)})))
 
-(defn create-var-entries [sexprs]
+(defn create-var-entries [sexprs project-info]
   (let [exprs-info (map build-expr-info sexprs)]
     (let [the-ns (first exprs-info)
           ns-info {:ns (:full-name the-ns)
                    :author (:author the-ns)
                    :ns-doc (:doc the-ns)}]
       (if (= 'ns (:expr-type (meta the-ns)))
-        (map #(merge ns-info %) (rest exprs-info))
+        (map #(merge ns-info {:project project-info} %) (rest exprs-info))
         (throw (Exception. "First element is not a namespace declaration."))))))
+
+(defn file-to-artifact [f]
+  "Convert a clojars path to an artifact specifier."
+  (let [pieces
+        (-> f (.split (str "clojars-clj" File/separator)) second
+            (.split ".jar!") first
+            (.split (str File/separator)) butlast
+            )]
+    [(apply str (interpose "." (butlast (butlast pieces))))
+     (last (butlast pieces))
+     (last pieces)]))
 
 (defn process-file [f]
   (binding [*read-eval* false] ;; untrusted code!!!
-    (create-var-entries (read-clojure-source test-file))))
+    (create-var-entries (read-clojure-source f) (file-to-artifact (.getAbsolutePath f)))))
+
+(defn info-from-clj [f src dest]
+  (try
+  (spew (str (.replace (.getAbsolutePath f) src dest) ".info.clj")
+        (pr-str (process-file f))) (catch Exception e)))
+
+(defn generate-infos [src dest]
+  (doseq [f (file-seq (File. src))]
+    (when (.endsWith (.getName f) ".clj")
+      (println (.getAbsolutePath f))
+      (info-from-clj f src dest))))
+        
+  
+
+
 
 ;; tests
 
 (def test-file
   "https://github.com/clojure/clojure/raw/b578c69d7480f621841ebcafdfa98e33fcb765f6/src/clj/clojure/core.clj")
   ;"src/var_finder/code_sample.clj")
+
+(def f2 "/projects/clooj.org/clojars-clj/hiccups/hiccups/0.1.1/hiccups-0.1.1.jar!/hiccups")
+
+(def f3 "/projects/clooj.org/clojars-clj/org/thnetos/cd-client/0.3.0/cd-client-0.3.0.jar!/cd_client/core.clj")
 
 (defn test-read []
   (read-clojure-source test-file))

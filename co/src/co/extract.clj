@@ -1,12 +1,8 @@
 (ns co.extract
-  (:use [clojure.contrib.duck-streams :only (slurp*)])
+  (:use [clojure.contrib.duck-streams :only (slurp*)]
+        [co.utils :only (spew)])
   (:import (java.util.zip ZipFile)
            (java.io File)))
-
-(defn spew [f content & options]
-  (let [f (if (isa? (type f) File) f (File. f))]
-    (.. f getParentFile mkdirs)
-    (apply spit f content options)))
 
 (defn jar-files [files]
   (filter #(.endsWith (.getAbsolutePath %) ".jar") files))
