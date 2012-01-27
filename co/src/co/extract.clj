@@ -13,18 +13,28 @@
 (defn clj-files [entries]
   (filter #(.endsWith (.getName %) ".clj") entries))
 
-(defn clj-from-jar [jar-file src dest]
+(defn clj-files-from-jar [jar-file]
   (let [entries (clj-files (get-entries-in-jar jar-file))]
-    (doseq [entry entries]
-      (let [path (str (.replace (.getAbsolutePath jar-file) src dest)
-                      "!" File/separator
+    (for [entry entries]
+      (let [path (str (.getAbsolutePath jar-file)
+                      "! "File/separator
                       (.getName entry))]
-        (spew path (slurp* (.getInputStream (ZipFile. jar-file) entry)))))))
+        {:path path
+         :text (slurp* (.getInputStream (ZipFile. jar-file) entry))}))))
     
-(defn clj-from-jars [src dest]
-  (doseq [jar-file (jar-files (file-seq (File. src)))]
-    (println (.getAbsolutePath jar-file))
+(defn clj-files-from-jars [top-folder]
+  (for [jar-file (jar-files (file-seq (File. top-folder)))]
     (try
-      (clj-from-jar jar-file src dest)
+      (clj-files-from-jar jar-file)
       (catch Exception e (println "Failed!")))))
   
+(defn file-to-artifact [f]
+  "Convert a clojars path to an artifact specifier."
+  (let [pieces
+        (-> f (.split (str "clojars-clj" File/separator)) second
+            (.split ".jar!") first
+            (.split (str File/separator)) butlast
+            )]
+    [(apply str (interpose "." (butlast (butlast pieces))))
+     (last (butlast pieces))
+     (last pieces)]))
