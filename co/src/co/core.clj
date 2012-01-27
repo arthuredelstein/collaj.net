@@ -1,15 +1,13 @@
 (ns co.core
   (:use [co.extract :only (clj-sources-from-jars)]
-        [co.parse :only (process-text)]
-        [local-file :only (file*)])
-  (:gen-class))
+        [local-file :only (file*)]
+        [co.parse :only (process-text)])
+  (:require [co (solr :as solr)])
+  (:import [java.util UUID])
+  ;(:gen-class)
+  )
 
 (def root (.getAbsolutePath (file* "../clojars-sync")))
-
-(def root-clj (.getAbsolutePath (file* "../clojars-clj")))
-
-(def info-clj (.getAbsolutePath (file* "../clojars-info")))
-
 
 
 ;(defn file-to-artifact [f]
@@ -23,11 +21,20 @@
 ;     (last (butlast pieces))
 ;     (last pieces)]))
 
-;
-;(defn process []
-;  (clj-files-from-jars root)
-;  (generate-infos root-clj info-clj))
-;
-;(defn -main [& args]
-;  (process))
-;
+
+(defn process []
+  (filter :name
+          (apply concat
+                 (for [source (clj-sources-from-jars root)]
+                   (try ;(println (:path source))
+                     (->> (process-text (:text source))
+                          (map #(assoc % :path (:path source)
+                                         :id (str (UUID/randomUUID)))))
+                     (catch Exception e nil))))))
+
+(defn submit [data]
+  (solr/add-docs data)
+  (solr/commit))
+  
+(defn submit-all []
+  (time (map submit (partition-all 1000 (process)))))

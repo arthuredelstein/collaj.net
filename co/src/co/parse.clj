@@ -31,6 +31,7 @@
   (let [code-reader (recording-source-reader (StringReader. (str \newline text)))]
     (take-while identity (repeatedly
                            (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
+                                        ;_ (println sexpr)
                                         nbot (.getLineNumber code-reader)
                                         code-lines (.toString code-reader)
                                         line (- nbot (count (.split code-lines "\n")))]
@@ -59,7 +60,7 @@
       (if (map? t3) t3)
       (if (and d (map? t4)) t4)
       (if d {:doc d})
-      {:arglists (get-arg-lists sexpr)})))
+      {:arglists (str (get-arg-lists sexpr))})))
 
 (defn get-meta-tail-doc
   [sexpr n]
@@ -67,9 +68,9 @@
     (get-meta-deflike sexpr)
     (let [[_ _ t3 t4] sexpr]
       {:doc
-        (condp = n
+        (str (condp = n
           3 t3
-          4 t4)})))
+          4 t4))})))
 
 ;; TODO: 'ns (namespaces)
 (defn analyze-sexpr
@@ -83,9 +84,9 @@
       '(defn definline defmacro defmulti defn-memo defnk)
         (get-meta-defnlike sexpr)
       '(defprotocol defunbound)
-        (get-meta-tail-doc 3)
+        (get-meta-tail-doc sexpr 3)
       '(defalias defvar)
-        (get-meta-tail-doc 4)
+        (get-meta-tail-doc sexpr 4)
       nil))
 
 (defn get-var-type [sexpr]
@@ -110,7 +111,7 @@
         (merge
           (meta sexpr)
           (select-keys analysis [:arglists :doc :added :deprecated :dynamic])
-          {:name (name (second sexpr))
+          {:name (try (name (second sexpr)) (catch Exception e nil))
            :var-type (get-var-type sexpr)}))
       {:expr-type (first sexpr)})))
 

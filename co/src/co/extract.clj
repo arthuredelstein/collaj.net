@@ -1,7 +1,18 @@
 (ns co.extract
-  (:use [clojure.contrib.duck-streams :only (slurp*)])
   (:import (java.util.zip ZipFile)
-           (java.io File)))
+           (java.io BufferedReader File))
+  (:use [clojure.java.io :only (reader)]))
+
+(defn #^String slurp*
+  "Like clojure.core/slurp but opens f with reader."
+  [f]
+  (with-open [^BufferedReader r (reader f)]
+             (let [sb (StringBuilder.)]
+               (loop [c (.read r)]
+                 (if (neg? c)
+                   (str sb)
+                   (do (.append sb (char c))
+                       (recur (.read r))))))))
 
 (defn jar-files
   "List all jar files located in hierarchy under top-folder."
