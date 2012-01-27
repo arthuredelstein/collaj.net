@@ -17,6 +17,9 @@
   "Add a single document to a solr database."
   (solr-update {:add {:doc doc-data}}))
 
+(defn solr-add-docs [docs]
+  (doall (map solr-add-doc docs)))
+
 (defn solr-delete-all []
   "Remove all documents from solr database."
   (solr-update {:delete {:query "*:*"}}))
@@ -31,6 +34,9 @@
                 {:query-params full-params})
         :body
         read-json)))
+
+(defn solr-get-docs [params]
+  (-> params solr-query :response :docs))
               
 ;; tests
 
