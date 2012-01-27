@@ -18,7 +18,10 @@
 (defn add-doc
   "Add a single document to the solr database."
   [doc-data]
-  (update {:add {:doc doc-data}}))
+  (try
+    (update {:add {:doc doc-data}})
+    (catch Exception e
+           (println "error adding doc with" doc-data))))
 
 (defn add-docs 
   "Add multiple documents to the solr database."
