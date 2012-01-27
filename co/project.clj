@@ -3,5 +3,7 @@
   :main co.core
   :dependencies [[org.clojure/clojure "1.2.1"]
                  [org.clojure/clojure-contrib "1.2.0"]
-                 [local-file "0.0.4"]]
+                 [local-file "0.0.4"]
+                 [clj-http "0.2.7"]
+                 [org.clojure/data.json "0.1.1"]]
                  )

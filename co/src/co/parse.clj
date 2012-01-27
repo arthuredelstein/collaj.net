@@ -140,7 +140,8 @@
 
 (defn process-file [f]
   (binding [*read-eval* false] ;; untrusted code!!!
-    (create-var-entries (read-clojure-source f) (file-to-artifact (.getAbsolutePath f)))))
+    (create-var-entries (read-clojure-source f)
+                        (file-to-artifact (.getAbsolutePath f)))))
 
 (defn info-from-clj [f src dest]
   (try
@@ -152,8 +153,6 @@
     (when (.endsWith (.getName f) ".clj")
       (println (.getAbsolutePath f))
       (info-from-clj f src dest))))
-        
-  
 
 
 
