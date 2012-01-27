@@ -37,4 +37,4 @@
   (solr/commit))
   
 (defn submit-all []
-  (time (map submit (partition-all 1000 (process)))))
+  (doall (map #(time (submit %)) (partition-all 1000 (process)))))
