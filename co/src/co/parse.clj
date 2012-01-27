@@ -62,7 +62,7 @@
       (if (map? t3) t3)
       (if (and d (map? t4)) t4)
       (if d {:doc d})
-      {:arglists (str (get-arg-lists sexpr))})))
+      {:arglists (prn-str (get-arg-lists sexpr))})))
 
 (defn get-meta-tail-doc
   [sexpr n]

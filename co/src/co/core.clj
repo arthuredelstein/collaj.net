@@ -26,7 +26,8 @@
   (filter :name
           (apply concat
                  (for [source (clj-sources-from-jars root)]
-                   (try ;(println (:path source))
+                   (try
+                     (println (:path source))
                      (->> (process-text (:text source))
                           (map #(assoc % :path (:path source)
                                          :id (str (UUID/randomUUID)))))
@@ -38,3 +39,7 @@
   
 (defn submit-all []
   (doall (map #(time (submit %)) (partition-all 1000 (process)))))
+
+(defn wipe []
+  (solr/delete-all)
+  (solr/commit))

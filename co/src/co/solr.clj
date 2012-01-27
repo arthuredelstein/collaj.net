@@ -49,11 +49,27 @@
         :body
         read-json)))
 
+(defn count-docs
+  "Get number of documents matching a query"
+  [params]
+  (-> params (assoc :rows 0) query :response :numFound))
+
 (defn get-docs
   "Get document data from solr database."
   [params]
   (-> params query :response :docs))
-              
+        
+;; MORE
+
+(defn re-index
+  "Re-index the solr database"
+  []
+  (let [step 1000]
+    (doseq [i (range 0 (count-docs {:q "*:*"}) step)]
+      (println i)
+      (add-docs (get-docs {:q "*:*" :start i :rows step}))
+      (commit))))
+      
 ;; tests
 
 (def test-data {:id "id2" :name "testname" :doc "test doc"})
