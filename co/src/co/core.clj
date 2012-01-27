@@ -11,10 +11,23 @@
 (def info-clj (.getAbsolutePath (file* "../clojars-info")))
 
 
-(defn process []
-  (clj-files-from-jars root)
-  (generate-infos root-clj info-clj))
 
-(defn -main [& args]
-  (process))
+;(defn file-to-artifact [f]
+;  "Convert a clojars path to an artifact specifier."
+;  (let [pieces
+;        (-> f (.split (str "clojars-clj" File/separator)) second
+;            (.split ".jar!") first
+;            (.split (str File/separator)) butlast
+;            )]
+;    [(apply str (interpose "." (butlast (butlast pieces))))
+;     (last (butlast pieces))
+;     (last pieces)]))
 
+;
+;(defn process []
+;  (clj-files-from-jars root)
+;  (generate-infos root-clj info-clj))
+;
+;(defn -main [& args]
+;  (process))
+;
