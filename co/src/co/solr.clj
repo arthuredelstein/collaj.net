@@ -2,50 +2,54 @@
   (:require [clj-http.client :as client])
   (:use [clojure.data.json :only (json-str read-json)]))
 
-(def solr-address "http://localhost:8983/solr/")
+(def address "http://localhost:8983/solr/")
 
-(def solr-json-update-address (str solr-address "update/json"))
+(def json-update-address (str address "update/json"))
 
-(def solr-query-address (str solr-address "select/"))
+(def query-address (str address "select/"))
 
-(defn solr-update
+;; WRITING
+
+(defn update
   "Post data to the local solr database."
   [data]
-  (client/post solr-json-update-address {:body (json-str data)}))
+  (client/post json-update-address {:body (json-str data)}))
 
-(defn solr-add-doc
+(defn add-doc
   "Add a single document to the solr database."
   [doc-data]
-  (solr-update {:add {:doc doc-data}}))
+  (update {:add {:doc doc-data}}))
 
-(defn solr-add-docs 
+(defn add-docs 
   "Add multiple documents to the solr database."
   [docs]
-  (doall (map solr-add-doc docs)))
+  (doall (map add-doc docs)))
 
-(defn solr-delete-all
+(defn delete-all
   "Remove all documents from solr database."
   []
-  (solr-update {:delete {:query "*:*"}}))
+  (update {:delete {:query "*:*"}}))
 
-(defn solr-commit
+(defn commit
   "Commit changes to solr database."
   []
-  (solr-update {:commit {}}))
+  (update {:commit {}}))
 
-(defn solr-query
-  "Read data from a solr database"
+;; READING
+
+(defn query
+  "Read data from solr database."
   [params]
   (let [full-params (merge {:wt "json"} params)]
-    (-> (client/get solr-query-address
+    (-> (client/get query-address
                 {:query-params full-params})
         :body
         read-json)))
 
-(defn solr-get-docs
-  "Get document data from a solr query"
+(defn get-docs
+  "Get document data from solr database."
   [params]
-  (-> params solr-query :response :docs))
+  (-> params query :response :docs))
               
 ;; tests
 
