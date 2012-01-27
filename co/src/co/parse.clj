@@ -35,8 +35,10 @@
                                         nbot (.getLineNumber code-reader)
                                         code-lines (.toString code-reader)
                                         line (- nbot (count (.split code-lines "\n")))]
-                                    (when sexpr (with-meta sexpr {:line line 
-                                                                  :source code-lines}))))))))
+                                    (try
+                                      (when sexpr (with-meta sexpr {:line line 
+                                                                    :source code-lines}))
+                                      (catch Exception e {}))))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
 ;; vars: {:name :doc :arglists :var-type :file :line :added :deprecated :dynamic}
