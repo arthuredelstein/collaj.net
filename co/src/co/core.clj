@@ -1,6 +1,6 @@
 (ns co.core
-  (:use [co.extract :only (clj-files-from-jars)]
-        [co.parse :only (generate-infos)]
+  (:use [co.extract :only (clj-sources-from-jars)]
+        [co.parse :only (process-text)]
         [local-file :only (file*)])
   (:gen-class))
 

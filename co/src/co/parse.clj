@@ -4,8 +4,7 @@
  (:import [clojure.lang LineNumberingPushbackReader]
           [java.io BufferedReader File StringReader]
           [java.lang StringBuilder])
- (:use [co.utils :only (spew)]
-       [clojure.pprint :only (pprint)]))
+ (:use [clojure.pprint :only (pprint)]))
 
 (defn has?
   "If x is in collection, returns x, else nil."
@@ -144,6 +143,6 @@
   (read-clojure-source test-file))
 
 (defn test-collect []
-  (process-file test-file))
+  (process-text test-file))
 
 

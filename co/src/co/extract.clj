@@ -1,6 +1,5 @@
 (ns co.extract
-  (:use [clojure.contrib.duck-streams :only (slurp*)]
-        [co.utils :only (spew)])
+  (:use [clojure.contrib.duck-streams :only (slurp*)])
   (:import (java.util.zip ZipFile)
            (java.io File)))
 
