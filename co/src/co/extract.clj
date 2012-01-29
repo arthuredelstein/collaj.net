@@ -3,6 +3,8 @@
            (java.io BufferedReader File))
   (:use [clojure.java.io :only (reader)]))
 
+(def failed-jars (atom []))
+
 (defn #^String slurp*
   "Like clojure.core/slurp but opens f with reader."
   [f]
@@ -45,15 +47,16 @@
          :text (slurp* (.getInputStream (ZipFile. jar-file) entry))
          }))))
     
-(defn clj-sources-from-jars [top-folder]
+(defn clj-sources-from-jars [jar-files]
   "Read the text of clj source files from a list of jars
    in the hierarchy located under top-folder. Return a list
    of maps each containing a path and source text."
   (filter identity
           (apply concat
-                 (for [jar-file (jar-files top-folder)]
+                 (for [jar-file jar-files]
                    (try
                      (clj-sources-from-jar jar-file)
-                     (catch Exception e (println "Failed!")))))))
+                     (catch Exception e 
+                            (swap! conj failed-jars [jar-file e])))))))
 
 (def root "/projects/clooj.org/clojars-sync/")

@@ -21,7 +21,7 @@
   (try
     (update {:add {:doc doc-data}})
     (catch Exception e
-           (println "error adding doc with" doc-data))))
+           (println e "error adding doc with" (prn-str doc-data)))))
 
 (defn add-docs 
   "Add multiple documents to the solr database."

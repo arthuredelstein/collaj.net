@@ -1,5 +1,5 @@
 (ns co.core
-  (:use [co.extract :only (clj-sources-from-jars)]
+  (:use [co.extract :only (jar-files clj-sources-from-jars)]
         [local-file :only (file*)]
         [co.parse :only (process-text)])
   (:require [co (solr :as solr)])
@@ -23,15 +23,18 @@
 
 
 (defn process []
-  (filter :name
-          (apply concat
-                 (for [source (clj-sources-from-jars root)]
-                   (try
-                     (println (:path source))
-                     (->> (process-text (:text source))
-                          (map #(assoc % :path (:path source)
-                                         :id (str (UUID/randomUUID)))))
-                     (catch Exception e nil))))))
+  (let [jars (jar-files root)]
+    (filter :name
+            (apply concat
+                   (for [source (drop 50000 (clj-sources-from-jars jars))]
+                     (let [path (:path source)]
+                       (when (not (.endsWith path "project.clj"))
+                         (try
+                           ;(println path)
+                           (->> (process-text (:text source))
+                                (map #(assoc % :path path
+                                             :id (str (UUID/randomUUID)))))
+                           (catch Exception e (do (prn e source) (throw e)))))))))))
 
 (defn submit [data]
   (solr/add-docs data)

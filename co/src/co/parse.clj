@@ -31,14 +31,13 @@
   (let [code-reader (recording-source-reader (StringReader. (str \newline text)))]
     (take-while identity (repeatedly
                            (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
-                                        ;_ (println sexpr)
                                         nbot (.getLineNumber code-reader)
                                         code-lines (.toString code-reader)
                                         line (- nbot (count (.split code-lines "\n")))]
                                     (try
                                       (when sexpr (with-meta sexpr {:line line 
                                                                     :source code-lines}))
-                                      (catch Exception e {}))))))))
+                                      )))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
 ;; vars: {:name :doc :arglists :var-type :file :line :added :deprecated :dynamic}
@@ -62,7 +61,7 @@
       (if (map? t3) t3)
       (if (and d (map? t4)) t4)
       (if d {:doc d})
-      {:arglists (prn-str (get-arg-lists sexpr))})))
+      {:arglists (get-arg-lists sexpr)})))
 
 (defn get-meta-tail-doc
   [sexpr n]
@@ -78,18 +77,19 @@
 (defn analyze-sexpr
   "Analyze the s-expression for docs and metadata."
   [sexpr]
+  (when (seq? sexpr)
     (condp has? (first sexpr)
       '(ns)
-        (get-meta-deflike sexpr)
+      (get-meta-deflike sexpr)
       '(def defhinted defonce defstruct)
-        (get-meta-deflike sexpr)
+      (get-meta-deflike sexpr)
       '(defn definline defmacro defmulti defn-memo defnk)
-        (get-meta-defnlike sexpr)
+      (get-meta-defnlike sexpr)
       '(defprotocol defunbound)
-        (get-meta-tail-doc sexpr 3)
+      (get-meta-tail-doc sexpr 3)
       '(defalias defvar)
-        (get-meta-tail-doc sexpr 4)
-      nil))
+      (get-meta-tail-doc sexpr 4)
+      nil)))
 
 (defn get-var-type [sexpr]
   (or
@@ -102,20 +102,30 @@
      (first sexpr))
     "var"))
 
+(defn drop-quotes [sexpr]
+  (if (and (seq? sexpr)
+           (= (first sexpr) 'quote))
+    (drop-quotes (second sexpr))
+    sexpr))
+
+(defn arglist-as-str [expr-info-map]
+  (update-in expr-info-map [:arglists] #(-> % drop-quotes pr-str)))
+
 (defn build-expr-info [sexpr]
-  (let [analysis (analyze-sexpr sexpr)]
-    (with-meta
-      (if (= (first sexpr) 'ns)
-        (merge
-          (select-keys analysis [:doc :author :subspaces :see-also])
-          {:full-name (name (second sexpr))
-           :short-name (name (second sexpr))})
-        (merge
-          (meta sexpr)
-          (select-keys analysis [:arglists :doc :added :deprecated :dynamic])
-          {:name (try (name (second sexpr)) (catch Exception e nil))
-           :var-type (get-var-type sexpr)}))
-      {:expr-type (first sexpr)})))
+  (when (seq? sexpr)
+    (let [analysis (arglist-as-str (analyze-sexpr sexpr))]
+      (with-meta
+        (if (has? ['ns 'in-ns] (first sexpr))
+          (merge
+            (select-keys analysis [:doc :author :subspaces :see-also])
+            {:full-name (name (drop-quotes (second sexpr)))
+             :short-name (name (drop-quotes (second sexpr)))})
+          (merge
+            (meta sexpr)
+            (select-keys analysis [:arglists :doc :added :deprecated :dynamic])
+            {:name (try (name (second sexpr)) (catch Exception e nil))
+             :var-type (get-var-type sexpr)}))
+        {:expr-type (first sexpr)}))))
 
 (defn create-var-entries [sexprs]
   (let [exprs-info (map build-expr-info sexprs)]
@@ -123,14 +133,13 @@
           ns-info {:ns (:full-name the-ns)
                    :author (:author the-ns)
                    :ns-doc (:doc the-ns)}]
-      (if (= 'ns (:expr-type (meta the-ns)))
+      (if (has? ['ns 'in-ns] (:expr-type (meta the-ns)))
         (map #(merge ns-info %) (rest exprs-info))
         (throw (Exception. "First element is not a namespace declaration."))))))
 
 (defn process-text [t]
   (binding [*read-eval* false] ;; untrusted code!!!
     (create-var-entries (read-clojure-source t))))
-
 
 ;; tests
 
