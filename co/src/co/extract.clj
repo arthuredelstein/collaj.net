@@ -51,12 +51,13 @@
   "Read the text of clj source files from a list of jars
    in the hierarchy located under top-folder. Return a list
    of maps each containing a path and source text."
+  (reset! failed-jars [])
   (filter identity
           (apply concat
                  (for [jar-file jar-files]
                    (try
                      (clj-sources-from-jar jar-file)
                      (catch Exception e 
-                            (swap! conj failed-jars [jar-file e])))))))
+                            (swap! failed-jars conj [jar-file e])))))))
 
 (def root "/projects/clooj.org/clojars-sync/")
