@@ -8,6 +8,8 @@
 
 (def query-address (str address "select/"))
 
+(def failed-adds (atom []))
+
 ;; WRITING
 
 (defn update
@@ -21,7 +23,7 @@
   (try
     (update {:add {:doc doc-data}})
     (catch Exception e
-           (println e "error adding doc with" (prn-str doc-data)))))
+           (swap! failed-adds conj [doc-data e]))))
 
 (defn add-docs 
   "Add multiple documents to the solr database."

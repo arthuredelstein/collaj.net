@@ -58,6 +58,6 @@
                    (try
                      (clj-sources-from-jar jar-file)
                      (catch Exception e 
-                            (swap! failed-jars conj [jar-file e])))))))
+                            (do (swap! failed-jars conj [jar-file e]) nil)))))))
 
 (def root "/projects/clooj.org/clojars-sync/")

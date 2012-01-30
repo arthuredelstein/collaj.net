@@ -6,6 +6,8 @@
           [java.lang StringBuilder])
  (:use [clojure.pprint :only (pprint)]))
 
+(def failed-to-process (atom []))
+
 (defn has?
   "If x is in collection, returns x, else nil."
   [coll x]
@@ -35,8 +37,9 @@
                                         code-lines (.toString code-reader)
                                         line (- nbot (count (.split code-lines "\n")))]
                                     (try
-                                      (when sexpr (with-meta sexpr {:line line 
-                                                                    :source code-lines}))
+                                      (when (and sexpr (instance? clojure.lang.IObj sexpr))
+                                        (with-meta sexpr {:line line 
+                                                          :source code-lines}))
                                       )))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
@@ -139,7 +142,9 @@
 
 (defn process-text [t]
   (binding [*read-eval* false] ;; untrusted code!!!
-    (create-var-entries (read-clojure-source t))))
+    (try
+      (create-var-entries (read-clojure-source t))
+      (catch Exception e (do (swap! failed-to-process conj [t e]) nil)))))
 
 ;; tests
 

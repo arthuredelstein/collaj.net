@@ -26,7 +26,7 @@
   (let [jars (jar-files root)]
     (filter :name
             (apply concat
-                   (for [source (drop 50000 (clj-sources-from-jars jars))]
+                   (for [source (clj-sources-from-jars jars)]
                      (let [path (:path source)]
                        (when (not (.endsWith path "project.clj"))
                          (try
