@@ -38,26 +38,16 @@
   "Read the text of clj source files from a jar file
    and return in a list of maps containing path and source text."
   [jar-file]
-  (let [entries (select-clj-jar-entries (get-entries-in-jar jar-file))]
-    (for [entry entries]
-      (let [path (str (.getAbsolutePath jar-file)
-                      "!" File/separator
-                      (.getName entry))]
-        {:path path
-         :text (slurp* (.getInputStream (ZipFile. jar-file) entry))
-         }))))
-    
-(defn clj-sources-from-jars [jar-files]
-  "Read the text of clj source files from a list of jars
-   in the hierarchy located under top-folder. Return a list
-   of maps each containing a path and source text."
-  (reset! failed-jars [])
-  (filter identity
-          (apply concat
-                 (for [jar-file jar-files]
-                   (try
-                     (clj-sources-from-jar jar-file)
-                     (catch Exception e 
-                            (do (swap! failed-jars conj [jar-file e]) nil)))))))
+  (try
+    (let [entries (select-clj-jar-entries (get-entries-in-jar jar-file))]
+      (for [entry entries]
+        (let [path (str (.getAbsolutePath jar-file)
+                        "!" File/separator
+                        (.getName entry))]
+          {:path path
+           :text (slurp* (.getInputStream (ZipFile. jar-file) entry))
+           })))  
+    (catch Exception e 
+           (do (swap! failed-jars conj [jar-file e]) nil))))
 
 (def root "/projects/clooj.org/clojars-sync/")

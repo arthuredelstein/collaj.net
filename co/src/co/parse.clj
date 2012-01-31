@@ -57,14 +57,15 @@
 
 (defn get-meta-defnlike
   [sexpr]
-  (let [[_ t2 t3 t4] sexpr
+  (let [[t1 t2 t3 t4] sexpr
         d (if (string? t3) t3)]
+    ;(println t2 t3 t4)
     (merge
       (meta t2)
       (if (map? t3) t3)
       (if (and d (map? t4)) t4)
       (if d {:doc d})
-      {:arglists (get-arg-lists sexpr)})))
+      (if (not= t1 'defmulti) {:arglists (get-arg-lists sexpr)}))))
 
 (defn get-meta-tail-doc
   [sexpr n]
@@ -95,15 +96,14 @@
       nil)))
 
 (defn get-var-type [sexpr]
-  (or
-    ({'defn      "function"
+    ({'def       "var"
+      'defn      "function"
       'definline "function"
       'defmacro  "macro"
       'defmulti  "multimethod"
       'defnmemo  "function"
       'defnk     "function"}
-     (first sexpr))
-    "var"))
+     (first sexpr)))
 
 (defn drop-quotes [sexpr]
   (if (and (seq? sexpr)
@@ -112,7 +112,13 @@
     sexpr))
 
 (defn arglist-as-str [expr-info-map]
-  (update-in expr-info-map [:arglists] #(-> % drop-quotes pr-str)))
+  (try
+  (update-in expr-info-map [:arglists]
+             #(when % (-> % drop-quotes pr-str)))
+    (catch Throwable e (do 
+                         (def x expr-info-map)
+                         (prn "arglist-as-str" expr-info-map e)
+                         (throw e)))))
 
 (defn build-expr-info [sexpr]
   (when (seq? sexpr)
@@ -131,20 +137,21 @@
         {:expr-type (first sexpr)}))))
 
 (defn create-var-entries [sexprs]
-  (let [exprs-info (map build-expr-info sexprs)]
-    (let [the-ns (first exprs-info)
-          ns-info {:ns (:full-name the-ns)
-                   :author (:author the-ns)
-                   :ns-doc (:doc the-ns)}]
-      (if (has? ['ns 'in-ns] (:expr-type (meta the-ns)))
-        (map #(merge ns-info %) (rest exprs-info))
-        (throw (Exception. "First element is not a namespace declaration."))))))
+  (filter :var-type
+          (let [exprs-info (map build-expr-info sexprs)]
+            (let [the-ns (first exprs-info)
+                  ns-info {:ns (:full-name the-ns)
+                           :author (:author the-ns)
+                           :ns-doc (:doc the-ns)}]
+              (if (has? ['ns 'in-ns] (:expr-type (meta the-ns)))
+                (map #(merge ns-info %) (rest exprs-info))
+                (throw (Exception. "First element is not a namespace declaration.")))))))
 
 (defn process-text [t]
   (binding [*read-eval* false] ;; untrusted code!!!
     (try
       (create-var-entries (read-clojure-source t))
-      (catch Exception e (do (swap! failed-to-process conj [t e]) nil)))))
+      (catch Throwable e (do (swap! failed-to-process conj [t e]) nil)))))
 
 ;; tests
 

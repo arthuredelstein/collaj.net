@@ -1,9 +1,10 @@
 (ns co.core
-  (:use [co.extract :only (jar-files clj-sources-from-jars)]
+  (:use [co.extract :only (jar-files clj-sources-from-jar)]
         [local-file :only (file*)]
         [co.parse :only (process-text)])
   (:require [co (solr :as solr)])
-  (:import [java.util UUID])
+  (:import [java.io File]
+           [java.util UUID])
   ;(:gen-class)
   )
 
@@ -22,26 +23,32 @@
 ;     (last pieces)]))
 
 
+(defn process-jar [jar]
+  ;(println jar)
+  (apply concat
+         (for [source (clj-sources-from-jar jar)]
+           (when source
+             (let [path (:path source)]
+               (when-not (.endsWith path "project.clj")
+                 (try
+                   ;(println path)
+                   (let [processed (process-text (:text source))]
+                     ;(println processed)
+                     (map #(assoc % :path path
+                                  :id (str (UUID/randomUUID))) processed))
+                   (catch Exception e (do (prn e source) (throw e))))))))))
+
 (defn process []
   (let [jars (jar-files root)]
-    (filter :name
-            (apply concat
-                   (for [source (clj-sources-from-jars jars)]
-                     (let [path (:path source)]
-                       (when (not (.endsWith path "project.clj"))
-                         (try
-                           ;(println path)
-                           (->> (process-text (:text source))
-                                (map #(assoc % :path path
-                                             :id (str (UUID/randomUUID)))))
-                           (catch Exception e (do (prn e source) (throw e)))))))))))
+    (filter :name (mapcat process-jar jars))))
 
 (defn submit [data]
+  ;(println data)
   (solr/add-docs data)
   (solr/commit))
   
 (defn submit-all []
-  (doall (map #(time (submit %)) (partition-all 1000 (process)))))
+  (dorun (map #(time (submit %)) (partition-all 1000 (process)))))
 
 (defn wipe []
   (solr/delete-all)
