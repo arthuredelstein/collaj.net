@@ -31,16 +31,17 @@
    the line number, the file name and the source text."
   [text]
   (let [code-reader (recording-source-reader (StringReader. (str \newline text)))]
-    (take-while identity (repeatedly
-                           (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
-                                        nbot (.getLineNumber code-reader)
-                                        code-lines (.toString code-reader)
-                                        line (- nbot (count (.split code-lines "\n")))]
-                                    (try
-                                      (when (and sexpr (instance? clojure.lang.IObj sexpr))
-                                        (with-meta sexpr {:line line 
-                                                          :source code-lines}))
-                                      )))))))
+    (take-while identity
+                (repeatedly
+                  (fn [] (let [sexpr (try (read code-reader) (catch Exception e nil))
+                               nbot (.getLineNumber code-reader)
+                               code-lines (.toString code-reader)
+                               line (- nbot (count (.split code-lines "\n")))]
+                           (try
+                             (when (and sexpr (instance? clojure.lang.IObj sexpr))
+                               (with-meta sexpr {:line line 
+                                                 :source code-lines}))
+                             )))))))
 
 ;; namespace: { :full-name :short-name :doc :author :members :subspaces :see-also}
 ;; vars: {:name :doc :arglists :var-type :file :line :added :deprecated :dynamic}
