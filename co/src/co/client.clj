@@ -20,7 +20,7 @@
     (doseq [group groups]
       (let [{:keys [name arglists ns doc var-type source]} (-> group :doclist :docs first)]
         (println (str name " [" ns "]"))
-        (println arglists)
+        (when arglists (println arglists))
         (println doc "\n")
         (println (if doc (.replace source doc "...") source) "\n")))))
 
@@ -29,7 +29,9 @@
   (GET "/data/:term" [term] (pr-str (search term)))
   (GET "/:term" [term] (str "<html><body><pre>"
                             (with-out-str (display (search term)))
-                            "</body></html></pre>"))
+                            "</pre></body></html>"))
   (route/not-found "<h1>Page not found</h1>"))
 
-(run-jetty main-routes {:port 8085})
+(def jetty-thread (Thread. #(run-jetty main-routes {:port 8080})))
+
+(.start jetty-thread)
