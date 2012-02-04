@@ -1,10 +1,12 @@
 (ns co.client
-  (:require [co (solr :as solr)]))
+  (:require [co (solr :as solr)])
+  (:use compojure.core, ring.adapter.jetty)
+  (:require [compojure.route :as route]))
 
 (defn search [text]
   (solr/query
     {:q text
-     :rows 100
+     :rows 10
      :fl "score,name,doc,arglists,ns,source,var-type"
      :group true
      :group.field "doc"
@@ -21,3 +23,13 @@
         (println arglists)
         (println doc "\n")
         (println (if doc (.replace source doc "...") source) "\n")))))
+
+
+(defroutes main-routes
+  (GET "/data/:term" [term] (pr-str (search term)))
+  (GET "/:term" [term] (str "<html><body><pre>"
+                            (with-out-str (display (search term)))
+                            "</body></html></pre>"))
+  (route/not-found "<h1>Page not found</h1>"))
+
+(run-jetty main-routes {:port 8085})

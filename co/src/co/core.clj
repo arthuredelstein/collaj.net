@@ -11,17 +11,18 @@
 (def root (.getAbsolutePath (file* "../clojars-sync")))
 
 
-;(defn file-to-artifact [f]
-;  "Convert a clojars path to an artifact specifier."
-;  (let [pieces
-;        (-> f (.split (str "clojars-clj" File/separator)) second
-;            (.split ".jar!") first
-;            (.split (str File/separator)) butlast
-;            )]
-;    [(apply str (interpose "." (butlast (butlast pieces))))
-;     (last (butlast pieces))
-;     (last pieces)]))
-
+(defn file-to-artifact [f]
+  "Convert a clojars path to an artifact specifier."
+  (let [/ (str File/separator)
+        pieces
+        (-> f (.split (str "clojars-sync" /)) second
+            (.split ".jar!") first
+            (.split /) butlast)
+        group (apply str (interpose "." (drop-last 2 pieces)))
+        name (-> pieces butlast last)
+        version (last pieces)
+        group-name (if (= group name) group (str group "/" name))]
+      (str "[" group-name " \"" version "\"]")))
 
 (defn process-jar [jar]
   ;(println jar)
@@ -34,8 +35,11 @@
                    ;(println path)
                    (let [processed (process-text (:text source))]
                      ;(println processed)
-                     (map #(assoc % :path path
-                                  :id (str (UUID/randomUUID))) processed))
+                     (map #(assoc %
+                                  :path path
+                                  :id (str "[" path " " (% :ns) "/" (% :name) "]")
+                                  :artifact (file-to-artifact path))
+                          processed))
                    (catch Exception e (do (prn e source) (throw e))))))))))
 
 (defn process []
