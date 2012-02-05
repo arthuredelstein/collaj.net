@@ -1,5 +1,5 @@
-(ns site.test.core
-  (:use [site.core])
+(ns site2.test.core
+  (:use [site2.core])
   (:use [clojure.test]))
 
 (deftest replace-me ;; FIXME: write
