@@ -8,7 +8,7 @@
   ;(:gen-class)
   )
 
-(def root (.getAbsolutePath (file* "../clojars-sync")))
+(def root (.getAbsolutePath (file* "./clojars-sync")))
 
 
 (defn file-to-artifact [f]

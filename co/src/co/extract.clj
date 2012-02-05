@@ -50,4 +50,4 @@
     (catch Exception e 
            (do (swap! failed-jars conj [jar-file e]) nil))))
 
-(def root "/projects/clooj.org/clojars-sync/")
+(def root "clojars-sync/")
