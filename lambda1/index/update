@@ -1,2 +1,0 @@
-rsync -av clojars.org::clojars clojars-sync
-
