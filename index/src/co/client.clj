@@ -34,4 +34,5 @@
 
 (def jetty-thread (Thread. #(run-jetty main-routes {:port 8080})))
 
-(.start jetty-thread)
+(defn run-server []
+  (.start jetty-thread)) 
