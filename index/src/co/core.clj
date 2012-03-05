@@ -5,8 +5,7 @@
   (:require [co (solr :as solr)])
   (:import [java.io File]
            [java.util UUID])
-  ;(:gen-class)
-  )
+  (:gen-class))
 
 (def root (.getAbsolutePath (file* "../clojars-sync")))
 
@@ -57,3 +56,6 @@
 (defn wipe []
   (solr/delete-all)
   (solr/commit))
+
+(defn -main [& args]
+  (submit-all))
