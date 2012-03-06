@@ -2,7 +2,7 @@
   (:use [co.extract :only (jar-files clj-sources-from-jar)]
         [local-file :only (file*)]
         [co.parse :only (process-text)])
-  (:require [co (solr :as solr)])
+  (:require [solrclient (core :as solr)])
   (:import [java.io File]
            [java.util UUID])
   (:gen-class))

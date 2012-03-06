@@ -6,5 +6,5 @@
                  [clj-http "0.2.7"]
                  [org.clojure/data.json "0.1.1"]
                  [compojure "1.0.1"]
-                 [ring "1.0.1"]]
-                 )
+                 [ring "1.0.1"]
+                 [solrclient "0.0.1"]])
