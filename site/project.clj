@@ -2,8 +2,11 @@
   :description "FIXME: write description"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [compojure "1.0.1"]
+                 [ring "1.0.1"]
                  [solrclient "0.0.2"]]
-  :dev-dependencies [[lein-cljsbuild "0.0.11"]]
+  :dev-dependencies [[lein-cljsbuild "0.0.11"]
+                     [lein-ring "0.5.4"]]
+  :ring {:handler site.core/app}
   :cljsbuild {
     ; The path to the top-level ClojureScript source directory:
     :source-path "src-cljs"
