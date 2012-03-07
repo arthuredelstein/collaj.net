@@ -9,7 +9,7 @@
   (solr/query
     {:q text
      :rows 10
-     :fl "score,name,doc,arglists,ns,source,var-type"
+     :fl "score,name,doc,arglists,ns,source,var-type,artifact"
      :group true
      :group.field "doc"
      :defType "dismax"
@@ -20,8 +20,9 @@
   (let [groups (-> results :grouped :doc :groups)]
     (println "Matches:" (count groups))
     (doseq [group groups]
-      (let [{:keys [name arglists ns doc var-type source]} (-> group :doclist :docs first)]
-        (println (str name " [" ns "]"))
+      (let [{:keys [name arglists ns doc var-type source artifact]}
+            (-> group :doclist :docs first)]
+        (println (str name " (" ns ") -- " artifact))
         (when arglists (println arglists))
         (println doc "\n")
         (println (if doc (.replace source doc "...") source) "\n")))))
