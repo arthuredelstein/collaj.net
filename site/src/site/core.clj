@@ -5,9 +5,12 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
 
+(defn sanitize [s]
+  (.replaceAll s "[!@#$%\\^&\\*()_\\+={}\\|\\\\\\[\\]:;\\\"\\'\\<\\>\\.\\,\\?\\/\\`\\~]" " "))
+
 (defn search [text]
   (solr/query
-    {:q text
+    {:q (sanitize text)
      :rows 10
      :fl "score,name,doc,arglists,ns,source,var-type,artifact"
      :group true
@@ -37,3 +40,7 @@
 
 (def app (handler/site main-routes))
 
+;; tests
+
+(defn test-sanitize []
+  (sanitize "as\\df%$#:;..~?/<>'@[]\"!^&(*+{}|g"))
