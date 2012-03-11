@@ -23,29 +23,30 @@
 
 
 (defn process-jar [jar]
-  (println jar)
+  ;(println jar)
   (apply concat
          (for [source (clj-sources-from-jar jar)]
            (when source
-             (let [path (:path source)]
+             (when-let [path (first source)]
                (when-not (.endsWith path "project.clj")
                  (try
                    ;(println path)
-                   (let [processed (analyze-clojure-source (:text source))]
+                   (let [processed (analyze-clojure-source (second source))]
                      ;(println processed)
                      (map #(assoc %
                                   :path path
                                   :id (str "[" path " " (% :ns) "/" (% :name) "]")
                                   :artifact (file-to-artifact path))
                           processed))
-                   (catch Exception e (do (prn e source) (throw e))))))))))
+                   (catch Exception e
+                          #_(do (prn e source) (throw e))))))))))
 
 (defn process []
   (let [jars (jar-files root)]
     (filter :name (mapcat process-jar jars))))
 
 (defn submit [data]
-  (println (first data))
+  ;(println (first data))
   (solr/add-docs data)
   (solr/commit))
   
