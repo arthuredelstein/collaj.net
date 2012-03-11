@@ -31,7 +31,7 @@
       (println "<hr>")
       (let [{:keys [name arglists ns doc var-type source artifact]}
             (-> group :doclist :docs first)]
-        (println (html [:b name] " (" ns ") -- " artifact))
+        (println (html [:b name] "         (" ns ") -- " artifact))
         (when arglists (println arglists))
         (println "\n" doc "\n")
         (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n"))))))
@@ -39,7 +39,7 @@
 (defhtml search-page [last-query results]
  [:html
          [:header
-          [:title "collaj: clojure function search"]]
+          [:title "collaj.net: clojure function search"]]
          [:body
           [:form {:action "/"}
            [:input {:type "text" :name "q" :value last-query}]
@@ -47,12 +47,13 @@
          ]
           [:pre results]]])
 
+(defn show-results [q]
+  (search-page q (with-out-str (display (search q)))))
+
 (defroutes main-routes
-  (GET "/" [q] (search-page q (with-out-str (display (search q)))))
+  (GET "/" [q] (show-results q))
   (GET "/data/:term" [term] (pr-str (escape-html (search term))))
-  (GET "/:term" [term] (str "<html><body><pre>"
-                            (with-out-str (display (search term)))
-                            "</pre></body></html>"))
+  (GET "/:term" [term] (show-results term))
   (route/not-found "<h1>Page not found</h1>"))
 
 (handler/api routes)
