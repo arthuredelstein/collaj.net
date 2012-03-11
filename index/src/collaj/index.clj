@@ -8,6 +8,22 @@
 
 (def root (.getAbsolutePath (File. "../clojars-sync")))
 
+(defn normal-releases-only [jar-files]
+  (->> jar-files
+       (filter #(re-find #"\A\d+\.\d+\.\d+\z" (.. % getParentFile getName)))))
+
+(defn release-version-comparable [jar-file]
+  (let [version-str (.. jar-file getParentFile getName)]
+    (vec (map #(Long/parseLong %) (.split version-str "\\.")))))
+  
+(defn take-latest-release [jar-files]
+  (->> jar-files
+       normal-releases-only
+       sort
+       (partition-by #(.. % getParentFile getParentFile))
+       (map #(sort-by release-version-comparable %))
+       (map last)))
+
 (defn file-to-artifact [f]
   "Convert a clojars path to an artifact specifier."
   (let [/ (str File/separator)
