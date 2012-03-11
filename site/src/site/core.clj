@@ -32,8 +32,9 @@
       (let [{:keys [name arglists ns doc var-type source artifact]}
             (-> group :doclist :docs first)]
         (println (html [:b name] "         (" ns ") -- " artifact))
+        (when var-type (println var-type))
         (when arglists (println arglists))
-        (println "\n" doc "\n")
+        (when doc (println "\n" doc "\n"))
         (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n"))))))
 
 (defhtml search-page [last-query results]
@@ -42,7 +43,8 @@
           [:title "collaj.net: clojure function search"]]
          [:body
           [:form {:action "/"}
-           [:input {:type "text" :name "q" :value last-query}]
+           [:input {:type "text" :autofocus "autofocus"
+                    :name "q" :value last-query}]
            [:input {:type "submit" :value "Search"}]
          ]
           [:pre results]]])

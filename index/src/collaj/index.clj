@@ -16,7 +16,7 @@
   (let [version-str (.. jar-file getParentFile getName)]
     (vec (map #(Long/parseLong %) (.split version-str "\\.")))))
   
-(defn take-latest-release [jar-files]
+(defn take-latest-releases [jar-files]
   (->> jar-files
        normal-releases-only
        sort
@@ -39,7 +39,7 @@
 
 
 (defn process-jar [jar]
-  ;(println jar)
+  (println jar)
   (apply concat
          (for [source (clj-sources-from-jar jar)]
            (when source
@@ -58,7 +58,7 @@
                           #_(do (prn e source) (throw e))))))))))
 
 (defn process []
-  (let [jars (jar-files root)]
+  (let [jars (take-latest-releases (jar-files root))]
     (filter :name (mapcat process-jar jars))))
 
 (defn submit [data]
