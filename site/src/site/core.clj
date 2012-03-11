@@ -31,7 +31,7 @@
       (println "<hr>")
       (let [{:keys [name arglists ns doc var-type source artifact]}
             (-> group :doclist :docs first)]
-        (println (str name " (" ns ") -- " artifact))
+        (println (html [:b name] " (" ns ") -- " artifact))
         (when arglists (println arglists))
         (println "\n" doc "\n")
         (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n"))))))
