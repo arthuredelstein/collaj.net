@@ -67,12 +67,15 @@
   (solr/commit))
   
 (defn submit-all []
+  (println "Sending vars to solr...")
   (dorun (map #(time (submit %)) (partition-all 1000 (process)))))
 
 (defn wipe []
+  (println "Wiping solr database")
   (solr/delete-all)
   (solr/commit))
 
 (defn -main [& args]
   (when (= "wipe" (first args))
-    (submit-all)))
+    (wipe))
+    (submit-all))
