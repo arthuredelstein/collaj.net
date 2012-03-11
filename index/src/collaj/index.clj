@@ -74,4 +74,5 @@
   (solr/commit))
 
 (defn -main [& args]
-  (submit-all))
+  (when (= "wipe" (first args))
+    (submit-all)))
