@@ -1,0 +1,1 @@
+ssh nohup lein ring server-headless 80
