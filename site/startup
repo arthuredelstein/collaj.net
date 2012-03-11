@@ -1,1 +1,1 @@
-ssh nohup lein ring server-headless 80
+sudo nohup lein ring server-headless 80 &
