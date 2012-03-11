@@ -12,17 +12,19 @@
     (.replaceAll s "[!@#$%\\^&\\*()_\\+={}\\|\\\\\\[\\]:;\\\"\\'\\<\\>\\.\\,\\?\\/\\`\\~]" " ")))
 
 (defn search [text]
-  (solr/query
-    {:q (sanitize text)
-     :rows 20
-     :fl "score,name,doc,arglists,ns,source,var-type,artifact"
-     :group true
-     :group.field "doc"
-     :defType "dismax"
-     :qf "name^2.0 doc^1.0"
-     }))
-
+  (when-let [sanitized-text (sanitize text)]
+    (solr/query
+      {:q sanitized-text
+       :rows 20
+       :fl "score,name,doc,arglists,ns,source,var-type,artifact"
+       :group true
+       :group.field "doc"
+       :defType "dismax"
+       :qf "name^2.0 doc^1.0"
+       })))
+  
 (defn display [results]
+  (when results
   (let [groups (-> results :grouped :doc :groups)]
     (println "Matches:" (count groups))
     (doseq [group groups]
@@ -32,7 +34,7 @@
         (println (str name " (" ns ") -- " artifact))
         (when arglists (println arglists))
         (println "\n" doc "\n")
-        (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n")))))
+        (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n"))))))
 
 (defhtml search-page [last-query results]
  [:html
