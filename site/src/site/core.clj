@@ -20,7 +20,7 @@
        :group true
        :group.field "doc"
        :defType "dismax"
-       :qf "name^2.0 doc^1.0"
+       :qf "name^5.0 doc^1.0 ns^3.0 artifact^3.0"
        })))
   
 (defn display [results]
