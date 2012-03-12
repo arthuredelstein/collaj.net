@@ -37,7 +37,6 @@
         group-name (if (= group name) group (str group "/" name))]
       (str "[" group-name " \"" version "\"]")))
 
-
 (defn process-jar [jar]
   (println jar)
   (apply concat
@@ -46,14 +45,14 @@
              (when-let [path (first source)]
                (when-not (.endsWith path "project.clj")
                  (try
-                   ;(println path)
-                   (let [processed (analyze-clojure-source (second source))]
-                     ;(println processed)
-                     (map #(assoc %
+                   (->> source
+                        second
+                        analyze-clojure-source
+                        (map
+                          #(assoc %
                                   :path path
                                   :id (str "[" path " " (% :ns) "/" (% :name) "]")
-                                  :artifact (file-to-artifact path))
-                          processed))
+                                  :artifact (file-to-artifact path))))
                    (catch Exception e
                           #_(do (prn e source) (throw e))))))))))
 
