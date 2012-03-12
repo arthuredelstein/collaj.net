@@ -20,9 +20,14 @@
        :group true
        :group.field "doc"
        :defType "dismax"
-       :qf "name^5.0 doc^1.0 ns^3.0 artifact^3.0"
+       :qf "name^5.0 doc^1.0 ns^3.0"
        })))
   
+(defn sanitize-map [m]
+  (into {}
+        (for [[k v] m]
+          [k (escape-html v)])))
+
 (defn display [results]
   (when results
   (let [groups (-> results :grouped :doc :groups)]
@@ -30,7 +35,7 @@
     (doseq [group groups]
       (println "<hr>")
       (let [{:keys [name arglists ns doc var-type source artifact]}
-            (-> group :doclist :docs first)]
+            (-> group :doclist :docs first sanitize-map)]
         (println (html [:b name] "         (" ns ") -- " artifact))
         (when var-type (println (html [:i var-type])))
         (when arglists (println arglists))
