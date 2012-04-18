@@ -23,7 +23,6 @@
        :qf "name^5.0 doc^1.0 ns^3.0"
        })))
   
-
 (defn var-data [search-result]
   (->> search-result :grouped :doc :groups
        (map #(-> % :doclist :docs first))))
@@ -33,19 +32,18 @@
         (for [[k v] m]
           [k (escape-html v)])))
 
-(defn display [results]
-  (when results
-  (let [groups (-> results :grouped :doc :groups)]
-    (println "Matches:" (count groups))
-    (doseq [group groups]
+(defn display [data]
+  (when data
+    (println "Matches:" (count data))
+    (doseq [datum data]
       (println "<hr>")
       (let [{:keys [name arglists ns doc var-type source artifact]}
-            (-> group :doclist :docs first sanitize-map)]
+            datum]
         (println (html [:b name] "         (" ns ") -- " artifact))
         (when var-type (println (html [:i var-type])))
         (when arglists (println arglists))
         (when doc (println "\n" doc "\n"))
-        (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n"))))))
+        (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n")))))
 
 (defhtml search-page [last-query results]
  [:html
@@ -60,7 +58,7 @@
           [:pre results]]])
 
 (defn show-results [q]
-  (search-page q (with-out-str (display (search q)))))
+  (search-page q (with-out-str (display (var-data (search q))))))
 
 (defroutes main-routes
   (GET "/" [q] (show-results q))
