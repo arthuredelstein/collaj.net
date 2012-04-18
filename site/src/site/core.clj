@@ -59,9 +59,10 @@
 
 (defroutes main-routes
   (GET "/" [q] (show-results q))
-  (GET "/data/:term" [term] (pr-str (escape-html (search term))))
+  (GET "/data/:term" [term] (pr-str (search term)))
   (GET "/:term" [term] (show-results term))
-  (route/not-found "<h1>Page not found</h1>"))
+  (route/resources "/")
+  (route/not-found "<h1>Page not found!</h1>"))
 
 (handler/api routes)
 
