@@ -23,6 +23,11 @@
        :qf "name^5.0 doc^1.0 ns^3.0"
        })))
   
+
+(defn var-data [search-result]
+  (->> search-result :grouped :doc :groups
+       (map #(-> % :doclist :docs first))))
+
 (defn sanitize-map [m]
   (into {}
         (for [[k v] m]
@@ -59,7 +64,7 @@
 
 (defroutes main-routes
   (GET "/" [q] (show-results q))
-  (GET "/data/:term" [term] (pr-str (search term)))
+  (GET "/data/:term" [term] (pr-str (var-data (search term))))
   (GET "/:term" [term] (show-results term))
   (route/resources "/")
   (route/not-found "<h1>Page not found!</h1>"))
