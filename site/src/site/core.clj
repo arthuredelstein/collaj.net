@@ -15,7 +15,7 @@
   (when-let [sanitized-text (sanitize text)]
     (solr/query
       {:q sanitized-text
-       :rows 20
+       :rows 30
        :fl "score,name,doc,arglists,ns,source,var-type,artifact"
        :group true
        :group.field "doc"
@@ -61,7 +61,9 @@
   (search-page q (with-out-str (display (var-data (search q))))))
 
 (defroutes main-routes
-  (GET "/" [q] (show-results q))
+  (GET "/" [q format] (if (= format "raw")
+                        (pr-str (var-data (search q)))
+                        (show-results q)))
   (GET "/data/:term" [term] (pr-str (var-data (search term))))
   (GET "/:term" [term] (show-results term))
   (route/resources "/")
