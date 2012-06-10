@@ -1,5 +1,5 @@
 (ns site.core
-  (:require [solrclient (core :as solr)])
+  (:require [solrclient.core :as solr])
   (:use compojure.core
         ring.adapter.jetty
         hiccup.core)
