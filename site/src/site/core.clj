@@ -50,7 +50,7 @@
           [:header
            [:title "collaj.net: clojure function search"]]
           [:body
-           [:h3 "collaj: clojure function search"]
+           [:h3 "collaj: search for clojure functions, macros, vars"]
            [:form {:action "/"}
             [:input {:type "text" :autofocus "autofocus"
                      :name "q" :value last-query}]
