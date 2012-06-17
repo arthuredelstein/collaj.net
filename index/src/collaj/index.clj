@@ -27,33 +27,45 @@
        (map #(sort-by release-version-comparable %))
        (map last)))
 
-(defn file-to-artifact [f]
+(defn file-to-artifact [root jar]
   "Convert a clojars path to an artifact specifier."
-  (try (:lein-specifier (jar-pom-info f)) (catch Exception e nil)))
-
+  (let [root-name (.getName (File. root))
+        / (str File/separator)
+        pieces
+        (-> jar (.split (str root-name /)) second
+            (.split ".jar!") first
+            (.split /) butlast)
+        group (apply str (interpose "." (drop-last 2 pieces)))
+        name (-> pieces butlast last)
+        version (last pieces)
+        group-name (if (= group name) group (str group "/" name))]
+      (str "[" group-name " \"" version "\"]")))
+  
+  
 (defn process-jar [jar]
   (println jar)
-  (when-let [artifact (file-to-artifact jar)]
-    (apply concat
-           (for [source (clj-sources-from-jar jar)]
-             (when source
-               (when-let [path (first source)]
-                 (when-not (.endsWith path "project.clj")
-                   (try
-                     (->> source
-                          second
-                          analyze-clojure-source
-                          (map
-                            #(assoc %
-                                    :path path
-                                    :id (str "[" artifact " " (% :ns) "/" (% :name) "]")
-                                    :artifact artifact)))
-                     (catch Exception e
-                            #(do (prn e source) (throw e)))))))))))
+  (apply concat
+         (for [source (clj-sources-from-jar jar)]
+           (when source
+             (when-let [path (first source)]
+               (when-not (.endsWith path "project.clj")
+                 (try
+                   (->> source
+                        second
+                        analyze-clojure-source
+                        (map
+                          #(assoc %
+                                  :path path)))
+                   (catch Exception e
+                          #(do (prn e source) (throw e))))))))))
 
 (defn process [root]
-  (let [jars (take-latest-releases (jar-files root))]
-    (filter :name (mapcat process-jar jars))))
+  (apply concat
+         (for [jar (take-latest-releases (jar-files root))]
+           (when-let [artifact (file-to-artifact root (.getAbsolutePath jar))]
+             (filter :name (map #(assoc % :artifact artifact
+                                          :id (str "[" artifact " " (% :ns) "/" (% :name) "]"))
+                                (process-jar jar)))))))
 
 (defn submit [data]
   ;(println (first data))
