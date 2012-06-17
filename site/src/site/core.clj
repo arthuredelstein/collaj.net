@@ -50,11 +50,11 @@
           [:header
            [:title "collaj.net: clojure function search"]]
           [:body
+           [:h3 "collaj: clojure function search"]
            [:form {:action "/"}
             [:input {:type "text" :autofocus "autofocus"
                      :name "q" :value last-query}]
-            [:input {:type "submit" :value "Search"}]
-            ]
+            [:input {:type "submit" :value "Search"}]]
            [:pre results]]])
 
 (defn show-results [q]

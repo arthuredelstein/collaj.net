@@ -1,6 +1,7 @@
 (ns collaj.index
   (:use [clj-inspector.vars :only (analyze-clojure-source)]
-        [clj-inspector.jars :only (clj-sources-from-jar jar-files)])
+        [clj-inspector.jars :only (clj-sources-from-jar jar-files
+                                   jar-pom-info)])
   (:require [solrclient (core :as solr)])
   (:import [java.io File]
            [java.util UUID])
@@ -26,16 +27,7 @@
 
 (defn file-to-artifact [f]
   "Convert a clojars path to an artifact specifier."
-  (let [/ (str File/separator)
-        pieces
-        (-> f (.split (str "clojars-sync" /)) second
-            (.split ".jar!") first
-            (.split /) butlast)
-        group (apply str (interpose "." (drop-last 2 pieces)))
-        name (-> pieces butlast last)
-        version (last pieces)
-        group-name (if (= group name) group (str group "/" name))]
-      (str "[" group-name " \"" version "\"]")))
+  (:lein-specifier (jar-pom-info f)))
 
 (defn process-jar [jar]
   (println jar)

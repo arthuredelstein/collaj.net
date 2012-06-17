@@ -5,4 +5,4 @@
                  [clj-http "0.2.7"]
                  [org.clojure/data.json "0.1.1"]
                  [solrclient "0.0.1"]
-                 [clj-inspector "0.0.12"]])
+                 [clj-inspector "0.0.13"]])
