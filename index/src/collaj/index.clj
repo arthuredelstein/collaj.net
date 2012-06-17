@@ -73,6 +73,6 @@
 (defn -main [& args]
   (when (= "wipe" (first args))
     (wipe))
-    (submit-all maven-root)
-    (submit-all clojars-root)
+  (submit-all maven-root)
+  (submit-all clojars-root)
   )
