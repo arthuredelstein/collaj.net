@@ -54,6 +54,7 @@
            [:form {:action "/"}
             [:input {:type "text" :autofocus "autofocus"
                      :name "q" :value last-query}]
+            " "
             [:input {:type "submit" :value "Search"}]]
            [:pre results]]])
 
