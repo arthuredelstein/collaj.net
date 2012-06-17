@@ -1,4 +1,4 @@
-(defproject collaj-index "0.0.1"
+(defproject collaj-index "0.0.2"
   :description "FIXME: write"
   :main collaj.index
   :dependencies [[org.clojure/clojure "1.3.0"]
