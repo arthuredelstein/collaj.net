@@ -9,7 +9,7 @@
 
 (defn sanitize [s]
   (when s
-    (.replaceAll s "[!@#$%\\^&\\*()_\\+={}\\|\\\\\\[\\]:;\\\"\\'\\<\\>\\.\\,\\?\\/\\`\\~]" " ")))
+    (.replaceAll s "[!@#$%\\^&\\*()_\\+={}\\|\\\\\\[\\]:;\\\"\"\\'\\<\\>\\.\\,\\?\\/\\`\\~]" " "))) 
 
 (defn search [text]
   (when-let [sanitized-text (sanitize text)]
@@ -46,16 +46,16 @@
         (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n")))))
 
 (defhtml search-page [last-query results]
- [:html
-         [:header
-          [:title "collaj.net: clojure function search"]]
-         [:body
-          [:form {:action "/"}
-           [:input {:type "text" :autofocus "autofocus"
-                    :name "q" :value last-query}]
-           [:input {:type "submit" :value "Search"}]
-         ]
-          [:pre results]]])
+         [:html
+          [:header
+           [:title "collaj.net: clojure function search"]]
+          [:body
+           [:form {:action "/"}
+            [:input {:type "text" :autofocus "autofocus"
+                     :name "q" :value last-query}]
+            [:input {:type "submit" :value "Search"}]
+            ]
+           [:pre results]]])
 
 (defn show-results [q]
   (search-page q (with-out-str (display (var-data (search q))))))
