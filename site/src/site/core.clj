@@ -66,6 +66,7 @@
                         (pr-str (var-data (search q)))
                         (show-results q)))
   (GET "/data/:term" [term] (pr-str (var-data (search term))))
+  (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
   (GET "/:term" [term] (show-results term))
   (route/resources "/")
   (route/not-found "<h1>Page not found!</h1>"))

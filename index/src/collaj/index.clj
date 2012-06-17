@@ -7,7 +7,9 @@
            [java.util UUID])
   (:gen-class))
 
-(def root (.getAbsolutePath (File. "../clojars-sync")))
+(def clojars-root (.getAbsolutePath (File. "../clojars-sync")))
+(def maven-root (.getAbsolutePath (File. "../maven-sync")))
+
 
 (defn normal-releases-only [jar-files]
   (->> jar-files
@@ -27,28 +29,29 @@
 
 (defn file-to-artifact [f]
   "Convert a clojars path to an artifact specifier."
-  (:lein-specifier (jar-pom-info f)))
+  (try (:lein-specifier (jar-pom-info f)) (catch Exception e nil)))
 
 (defn process-jar [jar]
   (println jar)
-  (apply concat
-         (for [source (clj-sources-from-jar jar)]
-           (when source
-             (when-let [path (first source)]
-               (when-not (.endsWith path "project.clj")
-                 (try
-                   (->> source
-                        second
-                        analyze-clojure-source
-                        (map
-                          #(assoc %
-                                  :path path
-                                  :id (str "[" path " " (% :ns) "/" (% :name) "]")
-                                  :artifact (file-to-artifact path))))
-                   (catch Exception e
-                          #_(do (prn e source) (throw e))))))))))
+  (when-let [artifact (file-to-artifact jar)]
+    (apply concat
+           (for [source (clj-sources-from-jar jar)]
+             (when source
+               (when-let [path (first source)]
+                 (when-not (.endsWith path "project.clj")
+                   (try
+                     (->> source
+                          second
+                          analyze-clojure-source
+                          (map
+                            #(assoc %
+                                    :path path
+                                    :id (str "[" artifact " " (% :ns) "/" (% :name) "]")
+                                    :artifact artifact)))
+                     (catch Exception e
+                            #(do (prn e source) (throw e)))))))))))
 
-(defn process []
+(defn process [root]
   (let [jars (take-latest-releases (jar-files root))]
     (filter :name (mapcat process-jar jars))))
 
@@ -57,9 +60,10 @@
   (solr/add-docs data)
   (solr/commit))
   
-(defn submit-all []
-  (println "Sending vars to solr...")
-  (dorun (map #(time (submit %)) (partition-all 1000 (process)))))
+(defn submit-all [root]
+  (let [var-data (partition-all 1000 (process root))]
+    (println "Sending vars to solr...")
+    (dorun (map #(time (submit %)) var-data))))
 
 (defn wipe []
   (println "Wiping solr database")
@@ -69,4 +73,6 @@
 (defn -main [& args]
   (when (= "wipe" (first args))
     (wipe))
-    (submit-all))
+    (submit-all maven-root)
+    (submit-all clojars-root)
+  )
