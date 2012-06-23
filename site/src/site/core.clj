@@ -1,8 +1,11 @@
 (ns site.core
   (:require [solrclient.core :as solr])
-  (:use compojure.core
-        ring.adapter.jetty
-        hiccup.core)
+  (:use [compojure.core]
+        [ring.adapter.jetty]
+        [hiccup.core]
+        [hiccup.def :only (defhtml)]
+        [hiccup.util :only (escape-html)]
+        [clojure.data.json :only (json-str pprint-json)])
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             ))
@@ -58,17 +61,14 @@
             [:input {:type "submit" :value "Search"}]]
            [:pre results]]])
 
-(defn show-results [q]
-  (search-page q (with-out-str (display (var-data (search q))))))
-
 (defroutes main-routes
-  (GET "/" [q format] (if (= format "raw")
-                        (pr-str (var-data (search q)))
-                        (show-results q)))
-  (GET "/data/:term" [term] (pr-str (var-data (search term))))
-  (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
-  (GET "/:term" [term] (show-results term))
   (route/resources "/")
+  (GET "/" [q format] (let [data (var-data (search q))]
+                        (condp = format
+                          "clj" (pr-str data)
+                          "json" (json-str data :escape-unicode false)
+                          (search-page q (with-out-str (display data))))))
+  (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
   (route/not-found "<h1>Page not found!</h1>"))
 
 (handler/api routes)
