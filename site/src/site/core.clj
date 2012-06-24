@@ -76,6 +76,7 @@
            (GET "/" [q format language]
                 (let [data (var-data (search (or language "clj") q))]
                   (condp = format
+                    "raw" (pr-str data)
                     "clj" (pr-str data)
                     "json" (json-str data :escape-unicode false)
                     (search-page q language (with-out-str (display data))))))
