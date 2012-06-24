@@ -76,7 +76,7 @@
   (solr/commit))
   
 (defn submit-all [root]
-  (let [var-data (partition-all 100 (process root))]
+  (let [var-data (partition-all 10 (process root))]
     (println "Sending vars to solr...")
     (dorun (map #(time (submit %)) var-data))))
 
