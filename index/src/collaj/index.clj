@@ -50,6 +50,7 @@
          (for [source (clj-sources-from-jar jar)]
            (when source
              (when-let [path (first source)]
+               (println path)
                (when-not (.endsWith path "project.clj")
                  (try
                    (->> source
@@ -70,7 +71,7 @@
                                 (process-jar jar)))))))
 
 (defn submit [data]
-  ;(println (first data))
+  '(println (first data))
   (solr/add-docs data)
   (solr/commit))
   
