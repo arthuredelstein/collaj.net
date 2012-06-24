@@ -62,14 +62,15 @@
            [:pre results]]])
 
 (defroutes main-routes
-  (route/resources "/")
-  (GET "/" [q format] (let [data (var-data (search q))]
-                        (condp = format
-                          "clj" (pr-str data)
-                          "json" (json-str data :escape-unicode false)
-                          (search-page q (with-out-str (display data))))))
-  (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
-  (route/not-found "<h1>Page not found!</h1>"))
+           (route/resources "/")
+           (GET "/" [q format]
+                (let [data (var-data (search q))]
+                  (condp = format
+                    "clj" (pr-str data)
+                    "json" (json-str data :escape-unicode false)
+                    (search-page q (with-out-str (display data))))))
+           (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
+           (route/not-found "<h1>Page not found!</h1>"))
 
 (handler/api routes)
 

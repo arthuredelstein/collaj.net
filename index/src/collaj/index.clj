@@ -1,6 +1,8 @@
 (ns collaj.index
   (:use [clj-inspector.vars :only (analyze-clojure-source)]
-        [clj-inspector.jars :only (clj-sources-from-jar jar-files
+        [clj-inspector.jars :only (clj-sources-from-jar
+                                   suffix
+                                   jar-files
                                    jar-pom-info)])
   (:require [solrclient (core :as solr)])
   (:import [java.io File]
@@ -52,7 +54,7 @@
                  (try
                    (->> source
                         second
-                        analyze-clojure-source
+                        (analyze-clojure-source (suffix path))
                         (map
                           #(assoc %
                                   :path path)))
