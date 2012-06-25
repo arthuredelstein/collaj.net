@@ -5,6 +5,8 @@
         [hiccup.core]
         [hiccup.def :only (defhtml)]
         [hiccup.util :only (escape-html)]
+        [hiccup.page :only (include-css include-js)]
+        [hiccup.element :only (javascript-tag)]
         [clojure.data.json :only (json-str pprint-json)])
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
@@ -38,26 +40,54 @@
 
 (defn display [data]
   (when data
-    (println "Matches:" (count data))
-    (doseq [datum data]
-      (println "<hr>")
-      (let [{:keys [name arglists ns doc var-type source artifact]}
-            datum]
-        (println (html [:b name] "         (" ns ") -- " artifact))
-        (when var-type (println (html [:i var-type])))
-        (when arglists (println arglists))
-        (when doc (println "\n" doc "\n"))
-        (println "\nSource:\n\n" (if doc (.replace source doc "...") source) "\n")))))
+    (list
+      [:h3 "Matches: "  (count data)]
+      [:p
+      (for [datum data]
+        (let [{:keys [name arglists ns doc var-type source artifact]}
+              datum]
+          (list
+            [:hr]
+            [:b name]
+            "         ("
+            ns
+            ") -- "
+            artifact
+            [:br]
+            [:i var-type]
+            [:br]
+            [:pre {:class "arglists"} arglists]
+            [:pre {:class "doc"} doc]
+            [:pre {:class (str "brush: clojure; gutter: false; toolbar: false")}
+             (if doc (.replace source doc "...") source)]
+            )))])))
 
 (defn menu-item [item-val selected-val]
   (merge {:value item-val}
          (when (= item-val selected-val)
            {:selected "selected"})))
 
-(defhtml search-page [last-query language results]
+(defhtml search-page [last-query language data]
          [:html
           [:header
-           [:title "collaj.net: clojure function search"]]
+           [:title "collaj.net: clojure function search"]
+           (include-css
+             "shCore.css" "shThemeDefault.css" "shClojureExtra.css")
+           (include-js
+             "shCore.js" "shBrushClojure.js")
+           (javascript-tag "SyntaxHighlighter.all();")]
+          [:style {:type "text/css"}
+           "body .syntaxhighlighter code,
+            body .syntaxhighlighter table caption,
+            body .syntaxhighlighter .gutter {
+            font-size: 13px !important;
+            }
+            .doc {
+            font-size: 13px;
+            }
+            .arglists {
+            font-size: 13px;
+            }"]            
           [:body
            [:h3 "collaj: search for functions, macros, vars in clojure and clojurescript"]
            [:form {:action "/"}
@@ -69,7 +99,7 @@
             [:select {:name "language"}
              [:option (menu-item "clj" language) "Clojure"]
              [:option (menu-item "cljs" language) "ClojureScript"]]]
-           [:pre results]]])
+           (display data)]])
 
 (defroutes main-routes
            (route/resources "/")
@@ -79,7 +109,7 @@
                     "raw" (pr-str data)
                     "clj" (pr-str data)
                     "json" (json-str data :escape-unicode false)
-                    (search-page q language (with-out-str (display data))))))
+                    (search-page q language data))))
            (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
            (route/not-found "<h1>Page not found!</h1>"))
 
