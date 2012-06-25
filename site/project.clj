@@ -2,7 +2,6 @@
   :description "FIXME: write description"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [compojure "1.1.0"]
-                 [ring "1.1.1"]
                  [solrclient "0.0.2"]
                  [hiccup "1.0.0"]
                  ;[moumar/domina "1.0.0-beta5"]
