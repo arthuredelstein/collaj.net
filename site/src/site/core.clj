@@ -70,7 +70,7 @@
 (defhtml search-page [last-query language data]
          [:html
           [:header
-           [:title "collaj.net: clojure code search"]]
+           [:title "collaj.net: clojure code search"]
            (include-css
              "shCore.css" "shThemeDefault.css" "shClojureExtra.css")
            (include-js
