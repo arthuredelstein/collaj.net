@@ -38,7 +38,7 @@
         (for [[k v] m]
           [k (escape-html v)])))
 
-(defn display [data]
+(defn display-data [data]
   (when data
     (list
       [:h3 "Matches: "  (count data)]
@@ -99,7 +99,7 @@
             [:select {:name "language"}
              [:option (menu-item "clj" language) "Clojure"]
              [:option (menu-item "cljs" language) "ClojureScript"]]]
-           (display data)]])
+           (display-data data)]])
 
 (defroutes main-routes
            (route/resources "/")
