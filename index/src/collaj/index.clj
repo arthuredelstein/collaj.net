@@ -50,7 +50,7 @@
          (for [source (clj-sources-from-jar jar)]
            (when source
              (when-let [path (first source)]
-               (println path)
+               ;(println path)
                (when-not (.endsWith path "project.clj")
                  (try
                    (->> source
@@ -63,12 +63,11 @@
                           #(do (prn e source) (throw e))))))))))
 
 (defn process [root]
-  (apply concat
          (for [jar (take-latest-releases (jar-files root))]
            (when-let [artifact (file-to-artifact root (.getAbsolutePath jar))]
              (filter :name (map #(assoc % :artifact artifact
                                           :id (str "[" artifact " " (% :ns) "/" (% :name) "]"))
-                                (process-jar jar)))))))
+                                (process-jar jar))))))
 
 (defn submit [data]
   '(println (first data))
@@ -76,7 +75,7 @@
   (solr/commit))
   
 (defn submit-all [root]
-  (let [var-data (partition-all 10 (process root))]
+  (let [var-data (process root)]
     (println "Sending vars to solr...")
     (dorun (map #(time (submit %)) var-data))))
 

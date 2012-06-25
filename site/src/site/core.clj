@@ -59,7 +59,7 @@
           [:header
            [:title "collaj.net: clojure function search"]]
           [:body
-           [:h3 "collaj: search for clojure functions, macros, vars"]
+           [:h3 "collaj: search for functions, macros, vars in clojure and clojurescript"]
            [:form {:action "/"}
             [:input {:type "text" :autofocus "autofocus"
                      :name "q" :value last-query}]
