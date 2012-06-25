@@ -57,9 +57,9 @@
 (defhtml search-page [last-query language results]
          [:html
           [:header
-           [:title "collaj.net: clojure function search"]]
+           [:title "collaj.net: clojure code search"]]
           [:body
-           [:h3 "collaj: search for functions, macros, vars in clojure and clojurescript"]
+           [:h3 "collaj: search for functions, macros, and vars in clojure and clojurescript"]
            [:form {:action "/"}
             [:input {:type "text" :autofocus "autofocus"
                      :name "q" :value last-query}]
