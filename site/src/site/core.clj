@@ -17,17 +17,18 @@
     (.replaceAll s "[!@#$%\\^&\\*()_\\+={}\\|\\\\\\[\\]:;\\\"\"\\'\\<\\>\\.\\,\\?\\/\\`\\~]" " "))) 
 
 (defn search [language text]
-  (when-let [sanitized-text (sanitize text)]
-    (solr/query
-      {:q sanitized-text
-       :rows 30
-       :fl "score,name,doc,arglists,ns,source,var-type,artifact,language"
-       :group true
-       :group.field "doc"
-       :defType "dismax"
-       :qf "name^5.0 doc^1.0 ns^3.0"
-       :fq (str "language:" language)
-       })))
+  (when-not (empty? (.trim (str text)))
+    (when-let [sanitized-text (.trim (sanitize text))]
+      (solr/query
+        {:q sanitized-text
+         :rows 30
+         :fl "score,name,doc,arglists,ns,source,var-type,artifact,language"
+         :group true
+         :group.field "doc"
+         :defType "dismax"
+         :qf "name^5.0 doc^1.0 ns^3.0"
+         :fq (str "language:" language)
+         }))))
   
 (defn var-data [search-result]
   (->> search-result :grouped :doc :groups
@@ -99,7 +100,8 @@
             [:select {:name "language"}
              [:option (menu-item "clj" language) "Clojure"]
              [:option (menu-item "cljs" language) "ClojureScript"]]]
-           (display-data data)]])
+           (when-not (empty? last-query)
+             (display-data data))]])
 
 (defroutes main-routes
            (route/resources "/")
