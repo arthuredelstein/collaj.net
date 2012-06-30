@@ -42,23 +42,24 @@
 (defn display-data [data]
   (when data
     (list
-      [:h3 "Matches: "  (count data)]
+      [:h5 "Matches: "  (count data)]
       [:p
       (for [datum data]
         (let [{:keys [name arglists ns doc var-type source artifact]}
               datum]
           (list
             [:hr]
-            [:b name]
+            [:h5
+            [:strong name]
             "         ("
             ns
             ") -- "
-            artifact
+            artifact]
+            [:pre.vartype var-type]
+            ;[:br]
+            [:pre.arglists arglists]
             [:br]
-            [:i var-type]
-            [:br]
-            [:pre {:class "arglists"} arglists]
-            [:pre {:class "doc"} doc]
+            [:pre.doc doc]
             [:pre {:class (str "brush: clojure; gutter: false; toolbar: false")}
              (if doc (.replace source doc "...") source)]
             )))])))
@@ -66,43 +67,39 @@
 (defn menu-item [item-val selected-val]
   (merge {:value item-val}
          (when (= item-val selected-val)
-           {:selected "selected"})))
+           {:selected "selected"})))     
 
 (defhtml search-page [last-query language data]
-         [:html
-          [:header
-           [:title "collaj.net: clojure code search"]
-           (include-css
-             "shCore.css" "shThemeDefault.css" "shClojureExtra.css")
-           (include-js
-             "shCore.js" "shBrushClojure.js")
-           (javascript-tag "SyntaxHighlighter.all();")]
-          [:style {:type "text/css"}
-           "body .syntaxhighlighter code,
-            body .syntaxhighlighter table caption,
-            body .syntaxhighlighter .gutter {
-            font-size: 13px !important;
-            }
-            .doc {
-            font-size: 13px;
-            }
-            .arglists {
-            font-size: 13px;
-            }"]            
-          [:body
-           [:h3 "collaj: search for functions, macros, and vars in clojure and clojurescript"]
-           [:form {:action "/"}
-            [:input {:type "text" :autofocus "autofocus"
-                     :name "q" :value last-query}]
-            " "
-            [:input {:type "submit" :value "Search"}]
-            " "
-            [:select {:name "language"}
-             [:option (menu-item "clj" language) "Clojure"]
-             [:option (menu-item "cljs" language) "ClojureScript"]]]
-           (when-not (empty? last-query)
-             (display-data data))]])
-
+  [:html
+   [:header
+    [:title "collaj.net: clojure code search"]
+    (include-css
+      "skeleton/layout.css"
+      "skeleton/base.css"
+      "skeleton/skeleton.css"
+      "shCore.css"
+      "shThemeDefault.css"
+      "shClojureExtra.css"
+      "collaj.css")
+    (include-js
+      "shCore.js" "shBrushClojure.js")
+    (javascript-tag "SyntaxHighlighter.all();")]
+   [:body
+    [:div.container
+     [:div
+      [:h2 "collaj: code search for clojure"]
+       [:form {:action "/"}
+       [:input {:type "text" :autofocus "autofocus"
+                :name "q" :value last-query}]
+              [:select {:name "language"}
+        [:option (menu-item "clj" language) "Clojure"]
+        [:option (menu-item "cljs" language) "ClojureScript"]]]
+       " "
+              ;[:input {:type "submit" :value "Search"}]
+       " "
+      (when-not (empty? last-query)
+        (display-data data))]]]])
+ 
 (defroutes main-routes
            (route/resources "/")
            (GET "/" [q format language]

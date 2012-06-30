@@ -1,0 +1,23 @@
+.doc,
+.arglists,
+.vartype {
+ font-family: Monaco, monospace;
+ ;line-height: 1.5;
+ ;font-size: 14px
+}
+
+.button,
+	button,
+	input[type="submit"],
+	input[type="reset"],
+	input[type="button"] {
+	font-size: 14px;
+	}
+	
+	body .syntaxhighlighter code,
+              body .syntaxhighlighter table caption,
+              body .syntaxhighlighter .gutter {
+              font-size: 14px !important;
+              line-height: 20px;
+              }
+              
