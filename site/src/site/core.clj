@@ -42,27 +42,31 @@
 (defn display-data [data]
   (when data
     (list
-      [:h5 "Matches: "  (count data)]
-      [:p
-      (for [datum data]
-        (let [{:keys [name arglists ns doc var-type source artifact]}
-              datum]
-          (list
-            [:hr]
-            [:h5
-            [:strong name]
-            "         ("
-            ns
-            ") -- "
-            artifact]
-            [:pre.vartype var-type]
-            ;[:br]
-            [:pre.arglists arglists]
-            [:br]
-            [:pre.doc doc]
-            [:pre {:class (str "brush: clojure; gutter: false; toolbar: false")}
-             (if doc (.replace source doc "...") source)]
-            )))])))
+      [:div.four.columns
+       [:ul#varlist
+       (for [datum data]
+         [:li.var (str (:name datum) " ")
+          [:span.ns (str "(" (:ns datum) ")")]])]]
+      [:div.twelve.columns
+       (interpose [:hr]
+       (for [datum data]
+         (let [{:keys [name arglists ns doc var-type source artifact]}
+               datum]
+           (list
+             [:h5
+              [:strong name]
+              "         ("
+              ns
+              ") -- "
+              artifact]
+             [:pre.vartype var-type]
+             ;[:br]
+             [:pre.arglists arglists]
+             [:br]
+             [:pre.doc doc]
+             [:pre {:class (str "brush: clojure; gutter: false; toolbar: false")}
+              (if doc (.replace source doc "...") source)]
+             ))))])))
 
 (defn menu-item [item-val selected-val]
   (merge {:value item-val}
@@ -70,38 +74,40 @@
            {:selected "selected"})))     
 
 (defhtml search-page [last-query language data]
-  [:html
-   [:header
-    [:title "collaj.net: clojure code search"]
-    (include-css
-      "skeleton/layout.css"
-      "skeleton/base.css"
-      "skeleton/skeleton.css"
-      "shCore.css"
-      "shThemeDefault.css"
-      "shClojureExtra.css"
-      "collaj.css")
-    (include-js
-      "shCore.js" "shBrushClojure.js")
-    (javascript-tag "SyntaxHighlighter.all();")]
-   [:body
-    [:div.container
-     [:div
-      [:h2 "collaj: code search for clojure"]
-       [:form {:action "/"}
-       [:input {:type "text" :autofocus "autofocus"
-                :name "q" :value last-query}]
-              [:select {:name "language"}
-        [:option (menu-item "clj" language) "Clojure"]
-        [:option (menu-item "cljs" language) "ClojureScript"]]]
-       " "
-              ;[:input {:type "submit" :value "Search"}]
-       " "
-      (when-not (empty? last-query)
-        (display-data data))]]]])
+         [:html
+          [:header
+           [:title "collaj.net: clojure code search"]
+           (include-css
+             "skeleton/layout.css"
+             "skeleton/base.css"
+             "skeleton/skeleton.css"
+             "shCore.css"
+             "shThemeDefault.css"
+             "shClojureExtra.css"
+             "collaj.css"
+             )
+           (include-js
+             "shCore.js" "shBrushClojure.js")
+           (javascript-tag "SyntaxHighlighter.all();")]
+          [:body
+           ;[:div#key {:style "float:right"} "blah"]
+           [:div.container
+          [:div.sixteen.columns
+             [:h2 "collaj: code search for clojure"]
+             [:form {:action "/"}
+              [:select#lang {:name "language"}
+               [:option (menu-item "clj" language) "Clojure"]
+               [:option (menu-item "cljs" language) "ClojureScript"]]
+            " " [:br]
+            [:input#q {:type "text" :autofocus "autofocus"
+                       :name "q" :value last-query}]]]
+             ;[:input {:type "submit" :value "Search"}]
+             ;[:select {:size 20 :style "scrollbar:no;background-color:#9ff"}
+             ; (map #(vector :option %) (map str (range 3 100 1.5)))] 
+             (when-not (empty? last-query)
+                 (display-data data))]]])
  
 (defroutes main-routes
-           (route/resources "/")
            (GET "/" [q format language]
                 (let [data (var-data (search (or language "clj") q))]
                   (condp = format
@@ -110,6 +116,7 @@
                     "json" (json-str data :escape-unicode false)
                     (search-page q language data))))
            (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
+                      (route/resources "/")
            (route/not-found "<h1>Page not found!</h1>"))
 
 (handler/api routes)

@@ -21,3 +21,28 @@
               line-height: 20px;
               }
               
+
+span.ns {
+color: gray;
+}
+
+li.var {
+margin-bottom: 10px;
+-moz-user-select: none;
+-webkit-user-select: none;
+}
+
+#q {
+display:inline;   
+margin-bottom: 5px; 
+}
+
+#lang {
+display:inline;
+width:120px;
+margin-bottom: 5px;
+}
+
+form {
+margin-bottom: 5px;
+}
