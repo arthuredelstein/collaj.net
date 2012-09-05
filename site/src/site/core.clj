@@ -92,20 +92,20 @@
           [:body
            ;[:div#key {:style "float:right"} "blah"]
            [:div.container
-          [:div.sixteen.columns
+            [:div.sixteen.columns
              [:h2 "collaj: code search for clojure"]
              [:form {:action "/"}
               [:select#lang {:name "language"}
                [:option (menu-item "clj" language) "Clojure"]
                [:option (menu-item "cljs" language) "ClojureScript"]]
-            " " [:br]
-            [:input#q {:type "text" :autofocus "autofocus"
-                       :name "q" :value last-query}]]]
-             ;[:input {:type "submit" :value "Search"}]
-             ;[:select {:size 20 :style "scrollbar:no;background-color:#9ff"}
-             ; (map #(vector :option %) (map str (range 3 100 1.5)))] 
-             (when-not (empty? last-query)
-                 (display-data data))]]])
+              " " [:br]
+              [:input#q {:type "text" :autofocus "autofocus"
+                         :name "q" :value last-query}]]]
+            ;[:input {:type "submit" :value "Search"}]
+            ;[:select {:size 20 :style "scrollbar:no;background-color:#9ff"}
+            ; (map #(vector :option %) (map str (range 3 100 1.5)))] 
+            (when-not (empty? last-query)
+              (display-data data))]]])
  
 (defroutes main-routes
            (GET "/" [q format language]
@@ -116,7 +116,7 @@
                     "json" (json-str data :escape-unicode false)
                     (search-page q language data))))
            (GET "/varcount" [] (str (solr/count-docs {:q "*:*"})))
-                      (route/resources "/")
+           (route/resources "/")
            (route/not-found "<h1>Page not found!</h1>"))
 
 (handler/api routes)
