@@ -1,0 +1,4 @@
+pushd ..
+curl -O https://archive.apache.org/dist/lucene/solr/3.5.0/apache-solr-3.5.0.zip
+unzip apache-solr-3.5.0.zip
+rm apache-solr-3.5.0.zip

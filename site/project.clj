@@ -12,7 +12,7 @@
             :dev-dependencies    
                      [[lein-git-deps "0.0.1-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "0.2.7"]
-            [lein-ring "0.7.5"]]
+            [lein-ring "0.8.7"]]
   :git-dependencies [["https://github.com/arthuredelstein/domina.git"]
                      ["https://github.com/arthuredelstein/crate.git"]
                      ]
